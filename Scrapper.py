@@ -1,29 +1,28 @@
-import requests
-from bs4 import BeautifulSoup
-from bokeh.plotting import figure, output_file, show
-import pandas
 import csv
-import re
 import os
+import re
+import sys
 import time
 from datetime import datetime
-from bokeh.models import HoverTool, ColumnDataSource
-import sys
 
+import pandas
+import requests
+from bokeh.models import HoverTool, ColumnDataSource
+from bokeh.plotting import figure, output_file, show
+from bs4 import BeautifulSoup
 
 start_time = datetime.now()
 
 
 class Scrapper:
-
     filename = sys.argv[1]
 
     def __init__(self):
         self.forecast_file = "forecast_" + datetime.now().strftime("%Y-%m-%d-%H-%M-%S-%f")
-        self.cnn_scarpper()
+        self.cnn_scrapper()
         self.draw_graph()
 
-    def cnn_scarpper(self):
+    def cnn_scrapper(self):
         with open(self.filename, 'r') as file:
             reader = csv.DictReader(file)
 
@@ -59,7 +58,7 @@ class Scrapper:
 
         forecast_text = [forecast.find("p").text]
 
-        if(forecast_text[0] != 'There is no forecast data available.'):
+        if forecast_text[0] != 'There is no forecast data available.':
             forecast = [symbol] + self.format_forecast(forecast_text)
 
             with open(self.forecast_file + ".csv", 'a+', newline="") as csvfile:
@@ -89,7 +88,8 @@ class Scrapper:
 
         return forecast_formatted
 
-    def reg_search(self, reg, val):
+    @staticmethod
+    def reg_search(reg, val):
         found = re.search(reg, val)
         if found:
             return found.group(0)
@@ -120,7 +120,8 @@ class Scrapper:
         p.add_tools(hover)
         show(p)
 
-    def get_color(self, median_pct):
+    @staticmethod
+    def get_color(median_pct):
         if median_pct <= -50:
             return "darkred"
         elif -50 < median_pct <= -15:
@@ -131,6 +132,7 @@ class Scrapper:
             return "yellow"
         else:
             return "green"
+
 
 scrapper = Scrapper()
 print("************************")
